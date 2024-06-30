@@ -1,6 +1,6 @@
-import User from "../models/user.model";
+import User from "../models/user.model.js";
 import bcryptjs from 'bcryptjs';
-import { errorHandler } from "../utils/error";
+import { errorHandler } from "../utils/error.js";
 
 
 
