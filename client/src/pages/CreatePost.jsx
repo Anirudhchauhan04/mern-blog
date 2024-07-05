@@ -1,3 +1,4 @@
+import { useRef, useState } from 'react';
 import { Alert, Button, FileInput, Select, TextInput } from 'flowbite-react';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
@@ -8,7 +9,6 @@ import {
   uploadBytesResumable,
 } from 'firebase/storage';
 import { app } from '../firebase';
-import { useState } from 'react';
 import { CircularProgressbar } from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css';
 import { useNavigate } from 'react-router-dom';
@@ -19,10 +19,11 @@ export default function CreatePost() {
   const [imageUploadError, setImageUploadError] = useState(null);
   const [formData, setFormData] = useState({});
   const [publishError, setPublishError] = useState(null);
+  const quillRef = useRef(null);
 
   const navigate = useNavigate();
 
-  const handleUpdloadImage = async () => {
+  const handleUploadImage = async () => {
     try {
       if (!file) {
         setImageUploadError('Please select an image');
@@ -58,6 +59,7 @@ export default function CreatePost() {
       console.log(error);
     }
   };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -74,14 +76,13 @@ export default function CreatePost() {
         return;
       }
 
-      if (res.ok) {
-        setPublishError(null);
-        navigate(`/post/${data.slug}`);
-      }
+      setPublishError(null);
+      navigate(`/post/${data.slug}`);
     } catch (error) {
       setPublishError('Something went wrong');
     }
   };
+
   return (
     <div className='p-3 max-w-3xl mx-auto min-h-screen'>
       <h1 className='text-center text-3xl my-7 font-semibold'>Create a post</h1>
@@ -98,11 +99,14 @@ export default function CreatePost() {
             }
           />
           <Select
+            defaultValue='uncategorized'
             onChange={(e) =>
               setFormData({ ...formData, category: e.target.value })
             }
           >
-            <option value='uncategorized'>Select a category</option>
+            <option value='uncategorized' disabled>
+              Select a category
+            </option>
             <option value='javascript'>JavaScript</option>
             <option value='reactjs'>React.js</option>
             <option value='nextjs'>Next.js</option>
@@ -119,8 +123,8 @@ export default function CreatePost() {
             gradientDuoTone='purpleToBlue'
             size='sm'
             outline
-            onClick={handleUpdloadImage}
-            disabled={imageUploadProgress}
+            onClick={handleUploadImage}
+            disabled={imageUploadProgress !== null}
           >
             {imageUploadProgress ? (
               <div className='w-16 h-16'>
@@ -143,6 +147,7 @@ export default function CreatePost() {
           />
         )}
         <ReactQuill
+          ref={quillRef}
           theme='snow'
           placeholder='Write something...'
           className='h-72 mb-12'
